@@ -1,6 +1,7 @@
 #! /bin/sh
 
 BOLD_WHITE='\033[1;37m'
+YELLOW='\033[0;93m'
 NO_C="\033[0m"
 
 echo "  Creating React with webPack."
@@ -21,7 +22,7 @@ fi
 npm i webpack webpack-cli -D
 
 if [ ! -f "webpack.config.js" ] ; then
-	echo " Create  ${BOLD_WHITE}webpack.config.js${NO_C} file"
+	echo " Create  ${YELLOW}webpack.config.js${NO_C} file"
 	touch webpack.config.js
 fi
 
