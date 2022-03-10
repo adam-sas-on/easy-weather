@@ -116,8 +116,11 @@ dist
 .pnp.*
 
 #custom
+local_settings.php
+
 src/sandbox/
 
 notes.md
+notes.txt
 
 out/
