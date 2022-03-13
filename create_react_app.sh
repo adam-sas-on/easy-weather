@@ -35,3 +35,4 @@ echo "    ${BOLD_WHITE}\"presets\": [\"@babel/preset-env\", \"@babel/preset-reac
 
 npm i css-loader style-loader --save-dev
 
+npm i react-router-dom --save-dev
