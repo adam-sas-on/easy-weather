@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-//import { Link/*, useLocation, useParams*/ } from "react-router-dom";
+import { Link/*, useLocation, useParams*/ } from "react-router-dom";
 import { getForecastForCityFromAPI } from "../apis/WeatherAPI.js";
 import { formatWindData,
          formatTemperature,
@@ -153,7 +153,7 @@ function CurrentForecast({ city, isMetricActive, is24hrs, goToConfig }){
         <div className="weather-forecast-auto-update"></div>
       </div>
       <div className="special-features-section">
-        <a className="link-radar special-features-button" href="radar.html">Radar</a>
+        <a className="link-radar special-features-button" href="#">(Radar.html)</a>
       </div>
       <div className="options-settings-enclosure enclosure">
         <div className="refresh-forecast-icon settings-inline">
@@ -169,7 +169,7 @@ function CurrentForecast({ city, isMetricActive, is24hrs, goToConfig }){
       <div className="error-message">Connection Error</div>
       {/* This strip will have forecast weather 'cards' */}
       <div className="hourly-menu-enclosure">
-        <a className="hourly-view-link" href="hourly.html"> Hourly </a>
+        <Link to="/hourly" className="hourly-view-link"> Hourly </Link>{/* <a className="hourly-view-link" href="hourly.html"> Hourly </a> */}
         <a className="five-day-header"> 5-day </a>
       </div>
       <div className="twelve-hour-section">
