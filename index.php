@@ -1,4 +1,23 @@
 <?php
+include dirname(__FILE__)."/modules/weatherApi.php";
+
+$weatherApi = new WeatherApi($_SERVER);
+
+if( $weatherApi->isAjaxReq() ){
+	$responseAjax = array();
+
+	if( !empty($_POST['cityName']) )
+		$responseAjax = $weatherApi->get($_POST['cityName']);
+	elseif( !empty($_POST['images']) ){
+		$responseAjax['files'] = $weatherApi->getImages(dirname(__FILE__));
+	} elseif( !empty($_POST['cityId']) ){
+		$responseAjax = $weatherApi->getWeatherByCityId($_POST['cityId']);
+	}
+
+	echo json_encode($responseAjax);
+	exit();
+}
+
 
 ?><!DOCTYPE html>
 <html lang="en">
