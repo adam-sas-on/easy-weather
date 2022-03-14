@@ -1,7 +1,8 @@
 <?php
+include dirname(__FILE__)."/local_settings.php";
 include dirname(__FILE__)."/modules/weatherApi.php";
 
-$weatherApi = new WeatherApi($_SERVER);
+$weatherApi = new WeatherApi($_SERVER, $db, $user_table, $city_table, $through_table);
 
 if( $weatherApi->isAjaxReq() ){
 	$responseAjax = array();
@@ -12,6 +13,8 @@ if( $weatherApi->isAjaxReq() ){
 		$responseAjax['files'] = $weatherApi->getImages(dirname(__FILE__));
 	} elseif( !empty($_POST['cityId']) ){
 		$responseAjax = $weatherApi->getWeatherByCityId($_POST['cityId']);
+	} elseif( !empty($_POST['longitude']) && !empty($_POST['latitude']) ){
+		$responseAjax = $weatherApi->getByCoord($_POST['longitude'], $_POST['latitude']);
 	}
 
 	echo json_encode($responseAjax);
