@@ -1,20 +1,18 @@
 #! /bin/sh
 
+YELLOW='\033[0;93m'
+NO_C="\033[0m"
+
 pwd=$PWD
 
-if [[ `git status -- electron/scripts/react/main.js --porcelain` ]] ; then
-	# file changed
-	npm run dev
-else
-	# file not changed
-	cd electron/scripts/react/
-
-	if [ -f "main.js.bak" ] ; then
-		rm main.js.bak
-	fi
-
+cd electron/scripts/react/
+if [ ! -f "main.js.bak" ] ; then
 	cp main.js main.js.bak
-	cd $pwd
-	npm run dev
+	echo " ${YELLOW}main.js${NO_C}  file not changed"
+else
+	echo " ${YELLOW}main.js${NO_C}  file changed"
 fi
 
+npm run dev
+
+# git checkout HEAD -- electron/scripts/react/main.js
