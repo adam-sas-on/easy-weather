@@ -11,15 +11,15 @@ import "../../../electron/styles/main.css";
  * @param images - array of strings with url path to images;
  * @returns {JSX.Element}
  */
-function ConfigPage({ images }){
+function ConfigPage({ images, currentCity, currentMetric, is24hrsSet, goToCurrentForecast }){
 	const [city, setCity] = useState("");
 	const [cityList, setCityList] = useState([]);
 	const [cityNodes, setCityNodes] = useState([]);
 	const [citySelectedIndex, setCityIndex] = useState(-1);
 	const [selectedCityLabel, setCityLabel] = useState("");
 	const [buttonDisabled, disableButton] = useState(true);
-	const [isMetricActive, setActiveMetric] = useState(true);
-	const [is24hrs, setIs24hrs] = useState(true);
+	const [isMetricActive, setActiveMetric] = useState(currentMetric);
+	const [is24hrs, setIs24hrs] = useState(is24hrsSet);
 	const [autoRefresh, setIsAutoRefresh] = useState(true);
 	const [imageIndex, setImageIndex] = useState(0);
 
@@ -31,6 +31,11 @@ function ConfigPage({ images }){
 		imgName = "url('" + imgName + "')";
 		document.body.style.backgroundImage = imgName;// DEFAULT_BACKGROUND_IMAGE;
 	}, []);/* componentDidMount */
+
+	useEffect(() => {
+		if(currentCity.hasOwnProperty("name") )
+			setCity(currentCity.name);
+	}, [currentCity]);
 
 
 	const buildCityNodes = function(cities){
@@ -87,16 +92,16 @@ function ConfigPage({ images }){
 		setCityIndex(-1);
 		// todo: save selected city somewhere;
 	}
-	
+
 	const closeConfigEnclosureClick = (e) => {
 		disableButton(true);
 		if(citySelectedIndex < 0){
 			e.preventDefault();
 			return;
 		}
-
-
 		// go to current-forecast.html;
+		let selectedCity = (citySelectedIndex >= 0 && citySelectedIndex < cityList.length)? cityList[citySelectedIndex] : null ;
+		goToCurrentForecast(selectedCity, isMetricActive, is24hrs, autoRefresh);
 	};
 
 	const backgroundImageEnclosureClick = (e) => {
@@ -153,11 +158,7 @@ function ConfigPage({ images }){
       <button type="button" className="btn btn-primary sharp-button save-button" disabled={ buttonDisabled }>Add to favorites</button>
     </div>
     <div className="save-city-div search-page-width-items margin-left">
-      <Link to={ `/currentForecast/${ citySelectedIndex >= 0 ? cityList[citySelectedIndex].id : -1 }` }
-            state={{ isMetricActive: isMetricActive, is24hrs: is24hrs, autoRefresh: autoRefresh }}
-            onClick={ closeConfigEnclosureClick }>
-        <button type="button" className="btn btn-primary sharp-button save-button" disabled={ buttonDisabled }>Show weather</button>
-      </Link>
+        <button type="button" className="btn btn-primary sharp-button save-button" onClick={ closeConfigEnclosureClick } disabled={ buttonDisabled }>Show weather</button>
     </div>
   </div>
   <ConfigOptions images={ images }

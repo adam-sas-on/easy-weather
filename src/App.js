@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route } from "react-router-dom";
+//import { HashRouter, Routes, Route } from "react-router-dom";
 import ConfigPage from "./Components/Config/ConfigPage.js";
 import CurrentForecast from "./Components/CurrentForecast/CurrentForecast.js";
 import { getImages } from "./Components/apis/MainAPI.js";
@@ -10,6 +10,10 @@ function App(){
 	const [location, updateLocation] = useState({location: 0, location: 0});
 	const [images, setImages] = useState([]);
 	const [loadConfig, setConfigLoading] = useState(true);
+	const [city, setCity] = useState({});
+	const [isMetricActive, setActiveMetric] = useState(true);
+	const [is24hrs, setIs24hrs] = useState(true);
+	const [autoRefresh, setIsAutoRefresh] = useState(true);
 
 
 	useEffect(() => {
@@ -23,6 +27,23 @@ function App(){
 
 
 
+	const goToCurrentForecast = (city, newIsMetricActive, newIs24hrs, newAutoRefresh) => {
+		if(typeof newIsMetricActive === 'boolean')
+			setActiveMetric(newIsMetricActive);
+		setIs24hrs(newIs24hrs);
+		setIsAutoRefresh(newAutoRefresh);
+		setCity(city);
+		console.log(newIsMetricActive, newIs24hrs, newAutoRefresh);
+
+		if(city !== null){
+			setCity(city);
+			setConfigLoading(false);
+		}
+	};
+
+	const goToConfig = function(){
+		setConfigLoading(true);
+	};
 
 	const setImagesCallback = (imagesList) => {
 		let defaultImage = "electron/img/backgrounds/background_003_blue_sea_sky.jpg", i;
@@ -42,12 +63,17 @@ function App(){
 	}
 
 	return (
-	<HashRouter>
-		<Routes>
-			<Route path="/currentForecast/:cityId" element={ <CurrentForecast /> } />
-			<Route path="/" element={ <ConfigPage images={ images } /> } />
-		</Routes>
-	</HashRouter>
+	<>
+	{/*<HashRouter>
+		<Routes>*/
+		loadConfig === true ? (
+			<ConfigPage images={ images } currentCity={ city } currentMetric={ isMetricActive } is24hrsSet={ is24hrs } goToCurrentForecast={ goToCurrentForecast } />
+		) : (
+			<CurrentForecast city={ city } isMetricActive={ isMetricActive } is24hrs={ is24hrs } goToConfig={ goToConfig } />
+		)
+		/*</Routes>
+	</HashRouter>*/}
+	</>
 	);
 }
 
