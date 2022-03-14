@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+//import { Link/*, useLocation, useParams*/ } from "react-router-dom";
 import { getForecastForCityFromAPI } from "../apis/WeatherAPI.js";
-import { formatWindData, MEASUREMENTS } from "../utils.js";
+import { formatWindData,
+         formatTemperature,
+         formatUpdateTime,
+         formatCurrentWeatherConditions,
+         getWeatherIconURL,
+         formatAtmosphericPressure,
+         formatHumidity, MEASUREMENTS } from "../utils.js";
 import "../../../electron/styles/weather.css";
 
 
-function CurrentForecast(){
+/**
+ *
+ */
+function CurrentForecast({ city, isMetricActive, is24hrs, goToConfig }){
 	const [windData, setWindData] = useState({windSpeed: "", windGust: "", windDeg: "", windCompassDirection: ""});
-	const [city, setCityName] = useState("_");
-	const [isMetricActive, setActiveMetric] = useState(true);
-	const [is24hrs, setIs24hrs] = useState(true);
+	const [temperature, setTemperature] = useState("");
+	const [pressure, setPressure] = useState("");
+	const [humidity, setHumidity] = useState("");
+	const [dateTime, setDateTime] = useState("date:time");
+	const [currentWeatherCond, setCurrentWeatherCond] = useState("Test condition");
+	const [currentWeatherDesc, setCurrentWeatherDesc] = useState("Test condition");
+	const [cityName, setCityName] = useState("_");
+	const [currentConditionsIcon, setCurrentConditionsIcon] = useState("");
 	const [autoRefresh, setIsAutoRefresh] = useState(true);
 	const [speedUnit, setSpeedUnit] = useState("km/h");
-	const { cityId } = useParams();
-	const location = useLocation();// location.state.
+	const [temperatureUnit, setTemperatureUnit] = useState("");
+	const [pressureUnit, setPressureUnit] = useState("");
+	//const { cityId } = useParams();
+	//const location = useLocation();// location.state.
 
 
 	useEffect(() => {
@@ -25,34 +41,55 @@ function CurrentForecast(){
 		if(location.hasOwnProperty("state") )
 			setUpParams(location.state);
 
-		let unitsName = isMetricActive ? "metric" : "imperial";
+		let unitsName = isMetricActive ? "metric" : "imperial", cityId = city.hasOwnProperty("id") ? city.id : -1;
 		setSpeedUnit(MEASUREMENTS[unitsName].wind);
 		getForecastForCityFromAPI(cityId, unitsName, renderRequestedWeather, requestedWeatherError);
-	}, [cityId]);/* componentDidMount */
+	}, [city]);/* componentDidMount */
 
 
 	const setUpParams = (params) => {
-		let newIsMetricActive = true, newIs24hrs = true, newAutoRefresh = true;
-		if( params.hasOwnProperty("isMetricActive") )
-			newIsMetricActive = (params.isMetricActive == false) ? false : true;
-
-		if( params.hasOwnProperty("is24hrs") )
-			newIs24hrs = (params.is24hrs == false) ? false : true;
+		let newAutoRefresh = true;
 
 		if( params.hasOwnProperty("autoRefresh") )
 			newAutoRefresh = (params.autoRefresh == false) ? false : true;
 
-		setActiveMetric(newIsMetricActive);
-		setIs24hrs(newIs24hrs);
 		setIsAutoRefresh(newAutoRefresh);
 	}
 
 	const renderRequestedWeather = function(weather){
 		let dataElement;
 		if( weather.hasOwnProperty("current") ){
-		 	dataElement = formatWindData(weather.current);
+		 	dataElement = formatWindData(weather.current, isMetricActive);
 		 	setWindData(dataElement);
+
+			dataElement = formatTemperature(weather.current, isMetricActive);
+			setTemperature(dataElement.value);
+			setTemperatureUnit(dataElement.unit);
+
+			dataElement = formatAtmosphericPressure(weather.current, isMetricActive);
+			setPressure(dataElement.value);
+			setPressureUnit(dataElement.unit);
+
+			dataElement = formatHumidity(weather.current);
+			setHumidity(dataElement);
 		 }
+
+		dataElement = formatUpdateTime(weather, is24hrs);
+		if(dataElement)
+			setDateTime(dataElement);
+
+		dataElement = formatCurrentWeatherConditions(weather);
+		if(dataElement){
+			setCurrentWeatherDesc(dataElement.desc);
+			setCurrentWeatherCond(dataElement.condition);
+		}
+
+		dataElement = getWeatherIconURL(weather);
+		if(dataElement)
+			setCurrentConditionsIcon(dataElement);
+
+		// todo: sunrise, sunset;
+		
 
 		if( weather.hasOwnProperty("cityName") ){
 			setCityName(weather.cityName);
@@ -65,21 +102,27 @@ function CurrentForecast(){
 		console.log(message);
 	}
 
+	const goBack = (e) => {
+		e.preventDefault();
+		goToConfig();
+	};
+
+
 	return (
   <div className="main-enclosure">
     <div className="top-strip">
-      <div className="current-conditions-icon"></div>
+      <div className="current-conditions-icon" style={ currentConditionsIcon.length > 0 ? { backgroundImage: "url('" + currentConditionsIcon + "')" } : {}}></div>
       <div className="city-temp-enclosure enclosure">
-        <div className="city-name">{ city }</div>
+        <div className="city-name">{ cityName }</div>
         <div className="temp-enclosure enclosure">
-          <div className="temperature-actual"></div>
+          <div className="temperature-actual">{ temperature } { temperatureUnit }</div>
           <div className="temperature-feels-like">_</div>
         </div>
-        <div className="current-weather-conditions"><p>Test condition</p>
+        <div className="current-weather-conditions"><p>{ currentWeatherCond }</p>
         </div>
-        <div className="weather-condition-description"><p>Test condition</p>
+        <div className="weather-condition-description"><p>{ currentWeatherDesc }</p>
         </div>
-        <div className="date-time">date:time</div>
+        <div className="date-time">{ dateTime }</div>
       </div>
       {/* This enclosure will have status like wind speed, direction, humidity */}
       <div className="other-stats-enclosure enclosure">
@@ -93,12 +136,12 @@ function CurrentForecast(){
         <div className="pressure-main-enclosure enclosure">
           <div className="category"> Pressure </div>
           <div className="separator"> | </div>
-          <div className="atmospheric-pressure"></div>
+          <div className="atmospheric-pressure">{ pressure } { pressureUnit }</div>
         </div>
         <div className="humidity-main-enclosure enclosure">
           <div className="category"> Humidity </div>
           <div className="separator"> | </div>
-          <div className="humidity"></div>
+          <div className="humidity">{ humidity }</div>
         </div>
         <div className="sunrise-set-enclosure enclosure">
           <div className="category"> Sun </div>
@@ -116,9 +159,9 @@ function CurrentForecast(){
         <div className="refresh-forecast-icon settings-inline">
           <i className="fas fa-sync-alt" alt="refresh"></i>
         </div>
-        <Link to="/" className="settings-icon settings-inline">
+        <a href="#" className="settings-icon settings-inline" onClick={ goBack }>
           &times;<i className="fas fa-wrench"> </i>
-        </Link>
+        </a>
         {/* <div className="settings-icon settings-inline"><i className="fas fa-wrench"></i></div> */}
       </div>
     </div>
