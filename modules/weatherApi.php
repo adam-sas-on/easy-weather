@@ -205,6 +205,13 @@ class WeatherApi {
 		return $this->isAjax;
 	}
 
+
+	/**
+	 *	Transforms simple key-property array of city into array with structure from weather_bulk;
+	 *
+	 * @param $rawCityArray - simple key-value array
+	 * @return - array with structure according to weather_bulk;
+	 */
 	private function cityPrototype($rawCityArray){
 		$prototype = array('id' => 0, 'name' => "", 'findname' => "", 'country' => "PL",
 		              'coord' => array('lon' => 0.0, 'lat' => 0.0)
@@ -241,6 +248,12 @@ class WeatherApi {
 		return $weather;
 	}
 
+	/**
+	 *	Gets coordinates from city structured array;
+	 *
+	 * @param $city_ob - associative array with structure of elements in  weather_bulk  file;
+	 * @return - array of coordinates;
+	 */
 	private function getCoordsFromCityObject($city_ob){
 		if(!isset($city_ob['city']) || empty($city_ob['city'])){
 			return FALSE;
